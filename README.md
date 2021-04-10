@@ -2,7 +2,9 @@
 Implementation Multi-Agent Deep Deterministic Policy Gradient (MADDPG) algorithm in keras
 
 I have already added trained model for demosntration 
-https://user-images.githubusercontent.com/50385421/114269676-fdf39a80-9a25-11eb-9a21-71a63620e303.mp4
+
+https://user-images.githubusercontent.com/50385421/114270020-b837d180-9a27-11eb-89ac-635e01092d96.mp4
+
 
 ## Requirements:
 tensorflow >= 2.3.0
@@ -26,6 +28,7 @@ For prediction run on command line
 
 ## Contact Information
 Please feel free to contact me if any help needed
+
 Email: *shuklaprashant652@gmail.com*
 
 
