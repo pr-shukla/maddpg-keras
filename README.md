@@ -7,10 +7,10 @@ https://user-images.githubusercontent.com/50385421/114270020-b837d180-9a27-11eb-
 
 
 ## Requirements:
-tensorflow >= 2.3.0
-numpy
-matplotlib
-math
+* tensorflow >= 2.3.0
+* numpy
+* matplotlib
+* math
 
 ## Running code
 To train the models run on command line
