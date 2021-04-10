@@ -15,6 +15,7 @@ https://user-images.githubusercontent.com/50385421/114270020-b837d180-9a27-11eb-
 ## Running code
 To train the models run on command line
 * python train.py
+
 For prediction run on command line
 * python prediction.py
 
