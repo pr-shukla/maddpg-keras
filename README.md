@@ -22,8 +22,8 @@ For prediction run on command line
 ## Code Structure
 * train.py --> To start training of models
 * buffer.py --> Contains code for replay buffer and training of models using MADDPG algorithm
-* noise.py --> generates noise ofr exploration
-* env.py --> code foe environment
+* noise.py --> generates noise for exploration
+* env.py --> code for environment
 * predict.py --> for prediction of models
 * .h5 --> All trained models
 
