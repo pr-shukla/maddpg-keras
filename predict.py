@@ -38,12 +38,14 @@ cr_models = []
 target_ac = []
 target_cr = []
 
-for i in range(num_agents):
-  ac_models.append(load_model('actor'+str(i)+'.h5')) 
-  cr_models.append(load_model('critic'+str(i)+'.h5'))
+path = 'C:/Users/HP/Desktop/desktop_folders/MS_Project_Codes/maddpg/maddpg_models/'
 
-  target_ac.append(load_model('target_actor'+str(i)+'.h5'))
-  target_cr.append(load_model('target_critic'+str(i)+'.h5'))
+for i in range(num_agents):
+  ac_models.append(load_model(path + 'actor'+str(i)+'.h5')) 
+  cr_models.append(load_model(path + 'critic'+str(i)+'.h5'))
+
+  target_ac.append(load_model(path + 'target_actor'+str(i)+'.h5'))
+  target_cr.append(load_model(path + 'target_critic'+str(i)+'.h5'))
 
 
 
