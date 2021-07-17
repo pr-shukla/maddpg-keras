@@ -15,7 +15,7 @@ from noise import *
 
 import os.path
 
-save_path = '/saved_model/'
+save_path = 'C:/Users/HP/Desktop/desktop_folders/MS_Project_Codes/maddpg/saved_model/'
 
 # Dimension of State Space for single agent
 dim_agent_state = 5
@@ -92,6 +92,7 @@ for ep in range(num_episodes):
     episodic_reward = 0
     ag1_reward = 0
     ag2_reward = 0
+    ev_reward  = 0
     
     # Positions of agents will be stored in these lists
     xp1 = []
@@ -135,6 +136,7 @@ for ep in range(num_episodes):
         # Rewards of agent 1 and 2
         ag1_reward += rewards[0]
         ag2_reward += rewards[1]
+        ev_reward  += rewards[2]
 
         # Updating parameters of actor and critic 
         # of all 3 agents using maddpg algorithm
@@ -154,14 +156,14 @@ for ep in range(num_episodes):
         yce.append(env.e_ry)
         
     # Saving models after every 10 episodes
-    if ep%10 == 0:
+    if ep%5 == 0:
         
       for k in range(num_agents):
-        ac_models[k].save('actor'+str(k)+'.h5') 
-        cr_models[k].save('critic'+str(k)+'.h5')
+        ac_models[k].save(save_path + 'actor'+str(k)+'.h5') 
+        cr_models[k].save(save_path + 'critic'+str(k)+'.h5')
 
-        target_ac[k].save('target_actor' + str(k)+'.h5')
-        target_cr[k].save('target_critic' + str(k)+'.h5')
+        target_ac[k].save(save_path + 'target_actor' + str(k)+'.h5')
+        target_cr[k].save(save_path + 'target_critic' + str(k)+'.h5')
     
     
     # Getting final position of evader
