@@ -147,7 +147,7 @@ for ep in range(1):
 
     # Mean of last 40 episodes
     avg_reward = np.mean(ep_reward_list[-40:])
-    print("Episode * {} * Avg Reward is ==> {} : Ag1 Reward ==> {} : Ag2 Reward ==> {} : Ev Reward ==> {}".format(ep+1, avg_reward, ag1_reward, ag2_reward, ev_reward))
+    print("Trajectory plot will be generated")
     avg_reward_list.append(avg_reward)
     plt.plot(xp1,yp1)
     plt.plot(xp2,yp2)
@@ -158,6 +158,7 @@ for ep in range(1):
 
 plt.show()
     
+print("Trajectory Animation will be generated")
 # Creating animation of the complete episode during execution
 # First set up the figure, the axis, and the plot element we want to animate
 fig = plt.figure()
