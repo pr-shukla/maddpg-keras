@@ -22,15 +22,21 @@ https://user-images.githubusercontent.com/50385421/114270020-b837d180-9a27-11eb-
 * math
 
 ## Installation
-Run this command on command prompt
+Run this command on command prompt to clone the repository
+
+
 `git clone https://github.com/pr-shukla/maddpg-keras.git`
 
 ## Running code
 To train the models run on command line
-* `python train.py`
+
+
+`python train.py`
 
 For test run on command line
-* `python prediction.py`
+
+
+`python prediction.py`
 
 ## Code Structure
 * `train.py` --> To start training of models
