@@ -7,7 +7,7 @@ from buffer import Buffer, update_target
 from env import NUM_AGENTS, DIM_AGENT_STATE, ENVIRONMENT, reward
 from model import get_actor, get_critic
 from noise import OUActionNoise
-from config import NUM_EPISODES, NUM_BUFFER, NUM_STEPS, STD_DEV, MODEL_PATH, BATCH_SIZE, TAU
+from config import NUM_EPISODES, NUM_BUFFER, NUM_STEPS, STD_DEV, MODEL_PATH, BATCH_SIZE, TAU, CHECKPOINTS
 
 save_path = MODEL_PATH
 
@@ -116,6 +116,17 @@ for ep in range(num_episodes):
         # Updating target networks for each agent
         update_target(TAU, ac_models, cr_models, target_ac, target_cr)
 
+
+	# Saving models after every 10 episodes
+    if ep%CHECKPOINTS == 0 and ep!=0:
+        
+        for k in range(num_agents):
+            ac_models[k].save(save_path + 'actor'+str(k)+'.h5') 
+            cr_models[k].save(save_path + 'critic'+str(k)+'.h5')
+
+            target_ac[k].save(save_path + 'target_actor' + str(k)+'.h5')
+            target_cr[k].save(save_path + 'target_critic' + str(k)+'.h5')
+	
     ep_reward_list.append(episodic_reward)
     
     # Mean of last 40 episodes

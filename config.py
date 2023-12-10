@@ -1,5 +1,8 @@
 # Number of Episodes
-NUM_EPISODES = 1000
+NUM_EPISODES = 3000
+
+# Checkpoints after which save models
+CHECKPOINTS = 100
 
 # Number of Steps in each episodes
 NUM_STEPS = 100
