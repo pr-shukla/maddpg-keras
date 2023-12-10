@@ -1,7 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras import layers
 
-from env import DIM_AGENT_STATE, NUM_AGENTS
+from env.env import DIM_AGENT_STATE, NUM_AGENTS
 
 def get_actor():
 

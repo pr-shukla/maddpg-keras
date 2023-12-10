@@ -3,10 +3,10 @@ import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
-from buffer import Buffer, update_target
-from env import NUM_AGENTS, DIM_AGENT_STATE, ENVIRONMENT, reward
-from model import get_actor, get_critic
-from noise import OUActionNoise
+from maddpg.buffer import Buffer, update_target
+from maddpg.model import get_actor, get_critic
+from maddpg.noise import OUActionNoise
+from env.env import NUM_AGENTS, DIM_AGENT_STATE, ENVIRONMENT, reward
 from config import NUM_EPISODES, NUM_BUFFER, NUM_STEPS, STD_DEV, MODEL_PATH, BATCH_SIZE, TAU, CHECKPOINTS
 
 save_path = MODEL_PATH
