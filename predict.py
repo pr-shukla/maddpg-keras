@@ -38,7 +38,7 @@ cr_models = []
 target_ac = []
 target_cr = []
 
-path = 'C:/Users/HP/Desktop/desktop_folders/MS_Project_Codes/maddpg/maddpg_models/'
+path = './saved_models/'
 
 for i in range(num_agents):
   ac_models.append(load_model(path + 'actor'+str(i)+'.h5')) 
