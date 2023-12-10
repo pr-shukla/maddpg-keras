@@ -5,28 +5,28 @@ from env import NUM_AGENTS, DIM_AGENT_STATE
 from config import CRITIC_LR, ACTOR_LR, GAMMA, TAU
 
 #Dimension of State Space for single agent
-dim_agent_state = 5
+dim_agent_state = DIM_AGENT_STATE
 
 #Number of Agents
-num_agents = 3
+num_agents = NUM_AGENTS
 
 #Dimension of State Space
 dim_state = dim_agent_state*num_agents
 
 
 # Learning rate for actor-critic models
-critic_lr = 1e-4
-actor_lr = 5e-5
+critic_lr = CRITIC_LR
+actor_lr = ACTOR_LR
 
 # Creating Optimizer for actor and critic networks
 critic_optimizer = tf.keras.optimizers.Adam(critic_lr)
 actor_optimizer = tf.keras.optimizers.Adam(actor_lr)
 
 # Discount factor for future rewards
-gamma = 0.95
+gamma = GAMMA
 
 # Used to update target networks
-tau = 0.005
+tau = TAU
 
 class Buffer:
     def __init__(self, buffer_capacity=10000, batch_size=64):
@@ -83,26 +83,29 @@ class Buffer:
         target_actions = np.zeros((self.batch_size, num_agents))
         for j in range(num_agents):
           target_actions[:,j] = tf.reshape(
-              target_ac[j](next_state_batch[:,5*j:5*(j+1)]), [self.batch_size]
+              target_ac[j](next_state_batch[:,dim_agent_state*j:dim_agent_state*(j+1)]), [self.batch_size]
               )
 
-        target_action_batch1 = target_actions[:,0]
-        target_action_batch2 = target_actions[:,1]
-        target_action_batch3 = target_actions[:,2]
-        action_batch1 = action_batch[:,0]
-        action_batch2 = action_batch[:,1]
-        action_batch3 = action_batch[:,2]
+        # target_action_batch1 = target_actions[:,0]
+        # target_action_batch2 = target_actions[:,1]
+        # target_action_batch3 = target_actions[:,2]
+        # action_batch1 = action_batch[:,0]
+        # action_batch2 = action_batch[:,1]
+        # action_batch3 = action_batch[:,2]
+        
+        state_target_action_batch = [next_state_batch]
+        for j in range(num_agents):
+            state_target_action_batch.append(target_actions[:,j])
+            
+        state_action_batch_critic = [state_batch]
+        for j in range(num_agents):
+            state_action_batch_critic.append(action_batch[:,j])
     
         # Finding Gradient of loss function
         with tf.GradientTape() as tape:
-            y = reward_batch[:,i] + gamma * target_cr[i]([
-                                                          next_state_batch, target_action_batch1, 
-                                                          target_action_batch2, target_action_batch3
-                                                          ])
+            y = reward_batch[:,i] + gamma * target_cr[i](state_target_action_batch)
             
-            critic_value = cr_models[i]([
-                                         state_batch, action_batch1, action_batch2, action_batch3
-                                         ])
+            critic_value = cr_models[i](state_action_batch_critic)
             
             critic_loss = tf.math.reduce_mean(tf.math.square(y - critic_value))
 
@@ -117,112 +120,163 @@ class Buffer:
         # Updating and Training of ***actor network** for ith agent
         actions = np.zeros((self.batch_size, num_agents))
         for j in range(num_agents):
-          a = ac_models[j](state_batch[:,5*j:5*(j+1)])
+          a = ac_models[j](state_batch[:,dim_agent_state*j:dim_agent_state*(j+1)])
           actions[:,j] = tf.reshape(a, [self.batch_size])
 
+        ########Start Code here#########
+        with tf.GradientTape(persistent=True) as tape:
+            action_ = ac_models[i](np.array([state_batch[:,dim_agent_state*i:dim_agent_state*(i+1)][0]]))
+
+            state_actions = [np.array([state_batch[0]])]
+
+            for k in range(num_agents):
+                if k==i:
+                    state_actions.append(action_)
+                else:
+                    state_actions.append(np.array([actions[:,k][0]]))
+
+            critic_value = cr_models[i](state_actions)
+
+        critic_grad = tape.gradient(critic_value, action_)
+        actor_grad = tape.gradient(action_, ac_models[i].trainable_variables)
+        
+        new_actor_grad = [critic_grad[0][0]*element for element in actor_grad]
+
+        for k in range(1,self.batch_size):
+            with tf.GradientTape(persistent=True) as tape:
+                  
+                action_ = ac_models[i](np.array([state_batch[:,dim_agent_state*i:dim_agent_state*(i+1)][k]]))
+                
+                state_actions = [np.array([state_batch[k]])]
+                
+                for l in range(num_agents):
+                    if l==i:
+                      state_actions.append(action_)
+                    else:
+                      state_actions.append(np.array([actions[:,l][k]]))
+
+                critic_value = cr_models[i](state_actions)
+
+            critic_grad = tape.gradient(critic_value, action_)
+            actor_grad = tape.gradient(action_, ac_models[i].trainable_variables)
+
+            for l in range(len(new_actor_grad)):
+                new_actor_grad[l] = new_actor_grad[l] + critic_grad[0][0]*actor_grad[l]
+
+
+        # Updating gradient network if it is 1st agent
+        new_actor_grad = [-1*element/self.batch_size for element in new_actor_grad]
+        actor_optimizer.apply_gradients(zip(new_actor_grad, ac_models[i].trainable_variables))
+        ########End code here###########
+
         # Finding gradient of actor model if it is 1st agent
-        if i == 0:
+        # if i == 0:
           
-          with tf.GradientTape(persistent=True) as tape:
+        #   with tf.GradientTape(persistent=True) as tape:
               
-              action_ = ac_models[i](np.array([state_batch[:,5*i:5*(i+1)][0]]))
+        #       action_ = ac_models[i](np.array([state_batch[:,dim_agent_state*i:dim_agent_state*(i+1)][0]]))
               
-              critic_value = cr_models[i]([np.array([state_batch[0]]), action_, np.array([actions[:,1][0]]),
-                                           np.array([actions[:,2][0]])])
+        #       state_actions = [np.array([state_batch[0]])]
+        #       state_actions.append(action_)
+        #       state_actions.append(np.array([actions[:,1][0]]))
+        #       state_actions.append(np.array([actions[:,2][0]]))
+        #       critic_value = cr_models[i](state_actions)
+        #       # critic_value = cr_models[i]([np.array([state_batch[0]]), action_, np.array([actions[:,1][0]]),
+        #       #                              np.array([actions[:,2][0]])])
 
-          critic_grad = tape.gradient(critic_value, action_)
-          actor_grad = tape.gradient(action_, ac_models[i].trainable_variables)
+        #   critic_grad = tape.gradient(critic_value, action_)
+        #   actor_grad = tape.gradient(action_, ac_models[i].trainable_variables)
 
           
-          new_actor_grad = [critic_grad[0][0]*element for element in actor_grad]
+        #   new_actor_grad = [critic_grad[0][0]*element for element in actor_grad]
 
-          for k in range(1,self.batch_size):
-              with tf.GradientTape(persistent=True) as tape:
+        #   for k in range(1,self.batch_size):
+        #       with tf.GradientTape(persistent=True) as tape:
                   
-                  action_ = ac_models[i](np.array([state_batch[:,5*i:5*(i+1)][k]]))
+        #           action_ = ac_models[i](np.array([state_batch[:,dim_agent_state*i:dim_agent_state*(i+1)][k]]))
                   
-                  critic_value = cr_models[i]([np.array([state_batch[k]]), action_, np.array([actions[:,1][k]]),
-                                               np.array([actions[:,2][k]])])
+        #           critic_value = cr_models[i]([np.array([state_batch[k]]), action_, np.array([actions[:,1][k]]),
+        #                                        np.array([actions[:,2][k]])])
 
-              critic_grad = tape.gradient(critic_value, action_)
-              actor_grad = tape.gradient(action_, ac_models[i].trainable_variables)
+        #       critic_grad = tape.gradient(critic_value, action_)
+        #       actor_grad = tape.gradient(action_, ac_models[i].trainable_variables)
 
-              for l in range(len(new_actor_grad)):
-                new_actor_grad[l] = new_actor_grad[l] + critic_grad[0][0]*actor_grad[l]
+        #       for l in range(len(new_actor_grad)):
+        #         new_actor_grad[l] = new_actor_grad[l] + critic_grad[0][0]*actor_grad[l]
 
 
-          # Updating gradient network if it is 1st agent
-          new_actor_grad = [-1*element/self.batch_size for element in new_actor_grad]
-          actor_optimizer.apply_gradients(zip(new_actor_grad, ac_models[i].trainable_variables))
+        #   # Updating gradient network if it is 1st agent
+        #   new_actor_grad = [-1*element/self.batch_size for element in new_actor_grad]
+        #   actor_optimizer.apply_gradients(zip(new_actor_grad, ac_models[i].trainable_variables))
         
-        # Finding gradient of actor model if it is 2nd agent
-        elif i == 1:
-          with tf.GradientTape(persistent=True) as tape:
+        # # Finding gradient of actor model if it is 2nd agent
+        # elif i == 1:
+        #   with tf.GradientTape(persistent=True) as tape:
               
-              action_ = ac_models[i](np.array([state_batch[:,5*i:5*(i+1)][0]]))
+        #       action_ = ac_models[i](np.array([state_batch[:,dim_agent_state*i:dim_agent_state*(i+1)][0]]))
               
-              critic_value = cr_models[i]([np.array([state_batch[0]]), np.array([actions[:,0][0]]),action_,
-                                           np.array([actions[:,2][0]])])
+        #       critic_value = cr_models[i]([np.array([state_batch[0]]), np.array([actions[:,0][0]]),action_,
+        #                                    np.array([actions[:,2][0]])])
 
-          critic_grad = tape.gradient(critic_value, action_)
-          actor_grad = tape.gradient(action_, ac_models[i].trainable_variables)
+        #   critic_grad = tape.gradient(critic_value, action_)
+        #   actor_grad = tape.gradient(action_, ac_models[i].trainable_variables)
 
           
-          new_actor_grad = [critic_grad[0][0]*element for element in actor_grad]
+        #   new_actor_grad = [critic_grad[0][0]*element for element in actor_grad]
 
-          for k in range(1,self.batch_size):
-              with tf.GradientTape(persistent=True) as tape:
+        #   for k in range(1,self.batch_size):
+        #       with tf.GradientTape(persistent=True) as tape:
                   
-                  action_ = ac_models[i](np.array([state_batch[:,5*i:5*(i+1)][k]]))
+        #           action_ = ac_models[i](np.array([state_batch[:,dim_agent_state*i:dim_agent_state*(i+1)][k]]))
                   
-                  critic_value = cr_models[i]([np.array([state_batch[k]]), np.array([actions[:,0][k]]),action_,
-                                               np.array([actions[:,2][k]])])
+        #           critic_value = cr_models[i]([np.array([state_batch[k]]), np.array([actions[:,0][k]]),action_,
+        #                                        np.array([actions[:,2][k]])])
 
-              critic_grad = tape.gradient(critic_value, action_)
-              actor_grad = tape.gradient(action_, ac_models[i].trainable_variables)
+        #       critic_grad = tape.gradient(critic_value, action_)
+        #       actor_grad = tape.gradient(action_, ac_models[i].trainable_variables)
 
-              for l in range(len(new_actor_grad)):
-                new_actor_grad[l] = new_actor_grad[l] + critic_grad[0][0]*actor_grad[l]
+        #       for l in range(len(new_actor_grad)):
+        #         new_actor_grad[l] = new_actor_grad[l] + critic_grad[0][0]*actor_grad[l]
 
 
-          # Updating gradient network if it is 2nd agent
-          new_actor_grad = [-1*element/self.batch_size for element in new_actor_grad]
-          actor_optimizer.apply_gradients(zip(new_actor_grad, ac_models[i].trainable_variables))
+        #   # Updating gradient network if it is 2nd agent
+        #   new_actor_grad = [-1*element/self.batch_size for element in new_actor_grad]
+        #   actor_optimizer.apply_gradients(zip(new_actor_grad, ac_models[i].trainable_variables))
 
         
-        # Finding gradient of actor model if it is 3rd agent
-        else:
-          with tf.GradientTape(persistent=True) as tape:
+        # # Finding gradient of actor model if it is 3rd agent
+        # else:
+        #   with tf.GradientTape(persistent=True) as tape:
               
-              action_ = ac_models[i](np.array([state_batch[:,5*i:5*(i+1)][0]]))
+        #       action_ = ac_models[i](np.array([state_batch[:,dim_agent_state*i:dim_agent_state*(i+1)][0]]))
               
-              critic_value = cr_models[i]([np.array([state_batch[0]]), np.array([actions[:,0][0]]),
-                                           np.array([actions[:,1][0]]), action_])
+        #       critic_value = cr_models[i]([np.array([state_batch[0]]), np.array([actions[:,0][0]]),
+        #                                    np.array([actions[:,1][0]]), action_])
 
-          critic_grad = tape.gradient(critic_value, action_)
-          actor_grad = tape.gradient(action_, ac_models[i].trainable_variables)
+        #   critic_grad = tape.gradient(critic_value, action_)
+        #   actor_grad = tape.gradient(action_, ac_models[i].trainable_variables)
 
           
-          new_actor_grad = [critic_grad[0][0]*element for element in actor_grad]
+        #   new_actor_grad = [critic_grad[0][0]*element for element in actor_grad]
 
-          for k in range(1,self.batch_size):
-              with tf.GradientTape(persistent=True) as tape:
+        #   for k in range(1,self.batch_size):
+        #       with tf.GradientTape(persistent=True) as tape:
                   
-                  action_ = ac_models[i](np.array([state_batch[:,5*i:5*(i+1)][k]]))
+        #           action_ = ac_models[i](np.array([state_batch[:,dim_agent_state*i:dim_agent_state*(i+1)][k]]))
                   
-                  critic_value = cr_models[i]([np.array([state_batch[k]]), np.array([actions[:,0][k]]),
-                                               np.array([actions[:,1][k]]), action_])
+        #           critic_value = cr_models[i]([np.array([state_batch[k]]), np.array([actions[:,0][k]]),
+        #                                        np.array([actions[:,1][k]]), action_])
 
-              critic_grad = tape.gradient(critic_value, action_)
-              actor_grad = tape.gradient(action_, ac_models[i].trainable_variables)
+        #       critic_grad = tape.gradient(critic_value, action_)
+        #       actor_grad = tape.gradient(action_, ac_models[i].trainable_variables)
 
-              for l in range(len(new_actor_grad)):
-                new_actor_grad[l] = new_actor_grad[l] + critic_grad[0][0]*actor_grad[l]
+        #       for l in range(len(new_actor_grad)):
+        #         new_actor_grad[l] = new_actor_grad[l] + critic_grad[0][0]*actor_grad[l]
 
 
-          # Updating gradient network if it is 3rd agent
-          new_actor_grad = [-1*element/self.batch_size for element in new_actor_grad]
-          actor_optimizer.apply_gradients(zip(new_actor_grad, ac_models[i].trainable_variables))
+        #   # Updating gradient network if it is 3rd agent
+        #   new_actor_grad = [-1*element/self.batch_size for element in new_actor_grad]
+        #   actor_optimizer.apply_gradients(zip(new_actor_grad, ac_models[i].trainable_variables))
 
           
         
