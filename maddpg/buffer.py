@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 
-from env import NUM_AGENTS, DIM_AGENT_STATE
+from env.env import NUM_AGENTS, DIM_AGENT_STATE
 from config import CRITIC_LR, ACTOR_LR, GAMMA, TAU
 
 #Dimension of State Space for single agent

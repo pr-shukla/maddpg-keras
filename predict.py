@@ -5,10 +5,11 @@ import matplotlib.pyplot as plt
 import math
 from tensorflow.keras.models import load_model
 from matplotlib import animation
-from env_predict import *
-from buffer import *
-from model import *
-from noise import *
+
+from env.env_predict import *
+from maddpg.buffer import *
+from maddpg.model import *
+from maddpg.noise import *
 
 dt = 0.4
 
