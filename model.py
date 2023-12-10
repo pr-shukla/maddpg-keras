@@ -3,8 +3,6 @@ from tensorflow.keras import layers
 
 from env import DIM_AGENT_STATE, NUM_AGENTS
 
-
-
 def get_actor():
 
     # Initialize weights between -3e-5 and 3-e5
@@ -12,7 +10,7 @@ def get_actor():
 
     # Actor will get observation of the agent
     # not the observation of other agents
-    inputs = layers.Input(shape=(5,))
+    inputs = layers.Input(shape=(DIM_AGENT_STATE,))
     out = layers.Dense(256, activation="selu", kernel_initializer="lecun_normal")(inputs)
     out = layers.Dropout(rate=0.5)(out)
     out = layers.BatchNormalization()(out)
@@ -28,10 +26,6 @@ def get_actor():
     model = tf.keras.Model(inputs, outputs)
     return model
 
-
-
-
-
 def get_critic(dim_state):
 
     last_init = tf.random_uniform_initializer(minval=-0.003, maxval=0.003)
@@ -46,11 +40,10 @@ def get_critic(dim_state):
     state_out = layers.Dense(32, activation="selu", kernel_initializer="lecun_normal")(state_out)
     state_out = layers.BatchNormalization()(state_out)
 
-    # Action all the agents as input
-    action_input1 = layers.Input(shape=(1))
-    action_input2 = layers.Input(shape=(1))
-    action_input3 = layers.Input(shape=(1))
-    action_input = layers.Concatenate()([action_input1, action_input2, action_input3])
+    # 
+    agents_action_input = [layers.Input(shape=(1)) for i in range(NUM_AGENTS)]
+    action_input = layers.Concatenate()(agents_action_input)
+    
     action_out = layers.Dense(32, activation="selu", kernel_initializer="lecun_normal")(action_input)
     action_out = layers.BatchNormalization()(action_out)
 
@@ -67,6 +60,6 @@ def get_critic(dim_state):
     outputs = layers.Dense(1)(out)
     
     # Outputs single value for give state-action
-    model = tf.keras.Model([state_input, action_input1, action_input2, action_input3], outputs)
+    model = tf.keras.Model([state_input]+agents_action_input, outputs)
 
     return model
