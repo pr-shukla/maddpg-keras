@@ -6,17 +6,19 @@ import numpy as np
 from config import NUM_STEPS, NUM_EPISODES
 
 #Dimension of State Space for single agent
-dim_agent_state = 5
+DIM_AGENT_STATE = 5
 
+# Number of agents
+NUM_AGENTS = 3
 
 #Time Difference Between 2 Steps
 dt = 0.4
 
 #Number of Episodes
-num_episodes = 3000
+num_episodes = NUM_EPISODES
 
 #Number of Steps
-num_steps = 100
+num_steps = NUM_STEPS
 
 #Minimum turing radius of Pursuer and Evader
 rho = 0.3
@@ -31,14 +33,11 @@ ve = 0.5
 #angle between initial velocity and reference
 te = 3*np.pi/4
 
-# Number of agents
-num_agents = 3
-
 #Dimension of State Space
-dim_state = dim_agent_state*num_agents
+dim_state = DIM_AGENT_STATE*NUM_AGENTS
 
 
-class environment:
+class ENVIRONMENT:
   def __init__(self):
     self.p1_rx = random.uniform(0.0, 5.0)
     self.p1_ry = random.uniform(0.0, 5.0)
@@ -228,7 +227,7 @@ def alph(state):
 #Reward Calculator
 def reward(state):
   rewards = []
-  for i in range(num_agents):
+  for i in range(NUM_AGENTS):
     '''
     ag_state = []
     for j in state[i*4:(i+1)*4]:
