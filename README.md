@@ -2,6 +2,8 @@
 # MADDPG KERAS Implementation
 Implementation Multi-Agent Deep Deterministic Policy Gradient (MADDPG) algorithm in keras with very simple customization. Link to the paper https://arxiv.org/pdf/1706.02275.pdf
 
+Previous version of code is available in [v0.1](https://github.com/pr-shukla/maddpg-keras/tree/v0.1) branch
+
 ## Table of Contents
 - [Project Description](#project-description)
 - [Features](#features)
@@ -87,12 +89,15 @@ python3 predict.py
 * `\env\env_predict.py`: Prediction/Testing environment is defined here
 * Please refer to algorithm while going through code
 ![maddpg_algo](https://github.com/pr-shukla/maddpg-keras/assets/50385421/768cb497-10cf-420b-b686-e961e39f6282)
+* Gradient calculation steps are extensively documented in Buffer.learn() method in `buffer.py`.
 
 ## Possible Enhancements
 Updates as of Dec 10, 2023
 * Training on **GPU** is not supported, contribution is welcomed to make this enhancement
 * Implementation has been tested for **tensorflow version 2.3 and 2.8**, recent versions may not work.
 * Currently time complexity of training is *O(batch size)*, please look at implmentation in buffer.py for more details
+* Implementation works for agents performing single dimensional actions only, not for multi dimensional action
+* Actions are unnessarily calculated in Buffer.learn() methods in `buffer.py`. Search @bug in `buffer.py` for more details
 
 ## How to Contribute
 * To make contribution simply create issue and raise pull request.
