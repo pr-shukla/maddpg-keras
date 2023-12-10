@@ -2,3 +2,5 @@
 /venv/
 /*.mp4
 /git*
+/env/__pycache__
+/maddpg/__pycache__

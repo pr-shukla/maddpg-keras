@@ -98,19 +98,21 @@ for ep in range(num_episodes):
         new_state = env.step(actions)
         
         # Rewards recieved is in form of list
-        # i.e for 3 agents we will get rewards
-        # all 3 agents in this list
+        # i.e for all agents we will get rewards
+        # for all agents in this list
+
         rewards = reward(new_state)
 
         # Record the experience of all the agents
         # in the replay buffer
+
         buffer.record((prev_state, actions, rewards, new_state))
         
-        # Sum of rewards of all 3 agents
+        # Sum of rewards of all agents
         episodic_reward += sum(rewards)
 
         # Updating parameters of actor and critic 
-        # of all 3 agents using maddpg algorithm
+        # of all  agents using maddpg algorithm
         buffer.learn(ac_models, cr_models, target_ac, target_cr)
         
         # Updating target networks for each agent

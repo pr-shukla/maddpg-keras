@@ -5,6 +5,14 @@ from env.env import DIM_AGENT_STATE, NUM_AGENTS
 
 def get_actor():
 
+    """
+    Creates actor model
+
+    Returns
+    -------
+    model: tf.keras.Model
+        keras actor model
+    """
     # Initialize weights between -3e-5 and 3-e5
     last_init = tf.random_uniform_initializer(minval=-0.00003, maxval=0.00003)
 
@@ -28,6 +36,20 @@ def get_actor():
 
 def get_critic(dim_state):
 
+    """
+    Creates and returns critic model
+
+    Parameters
+    ----------
+    dim_state: int
+        sum of dimension of state of each agents
+    
+    Returns
+    -------
+    model: tf.keras.Model
+        keras critic model
+    """
+    
     last_init = tf.random_uniform_initializer(minval=-0.003, maxval=0.003)
     
     # State as input, here this state is
