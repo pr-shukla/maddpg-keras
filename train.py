@@ -1,19 +1,13 @@
 import numpy as np
 
-import math
-
 import tensorflow as tf
-from tensorflow.keras import layers
-from tensorflow.keras.models import load_model
-
 import matplotlib.pyplot as plt
 
-from buffer import *
-from env import *
-from model import *
-from noise import *
-
-import os.path
+from buffer import Buffer, update_target
+from env import NUM_AGENTS, DIM_AGENT_STATE, ENVIRONMENT, reward
+from model import get_actor, get_critic
+from noise import OUActionNoise
+from config import NUM_EPISODES, NUM_BUFFER, NUM_STEPS, STD_DEV, MODEL_PATH, BATCH_SIZE
 
 save_path = 'C:/Users/HP/Desktop/desktop_folders/MS_Project_Codes/maddpg/saved_model/'
 

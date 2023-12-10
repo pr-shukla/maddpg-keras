@@ -1,9 +1,7 @@
-import numpy as np
 import tensorflow as tf
 from tensorflow.keras import layers
-import matplotlib.pyplot as plt
-import math
-from tensorflow.keras.models import load_model
+
+from env import DIM_AGENT_STATE, NUM_AGENTS
 
 
 

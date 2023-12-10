@@ -1,9 +1,9 @@
-import numpy as np
-import tensorflow as tf
-from tensorflow.keras import layers
-import matplotlib.pyplot as plt
 import math
 import random
+
+import numpy as np
+
+from config import NUM_STEPS, NUM_EPISODES
 
 #Dimension of State Space for single agent
 dim_agent_state = 5
