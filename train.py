@@ -118,6 +118,9 @@ for ep in range(num_episodes):
         # Updating target networks for each agent
         update_target(TAU, ac_models, cr_models, target_ac, target_cr)
 
+	# Updating old state with new state
+        prev_state = new_state
+
 
 	# Saving models after every 10 episodes
     if ep%CHECKPOINTS == 0 and ep!=0:
